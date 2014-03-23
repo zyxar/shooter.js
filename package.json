@@ -1,0 +1,24 @@
+{
+  "name": "shooter",
+  "version": "0.0.1",
+  "description": "fetch subtitle from shooter.cn",
+  "main": "index.js",
+  "author": "zyxar <teamo@live.com>",
+  "license": "MIT",
+  "bin": {
+    "shooter": "./bin/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zyxar/shooter.js.git"
+  },
+  "keywords": [
+    "subtitle",
+    "shooter"
+  ],
+  "bugs": {
+    "url": "https://github.com/zyxar/shooter/issues"
+  },
+  "dependencies": {
+  }
+}
