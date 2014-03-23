@@ -1,9 +1,11 @@
 (function () {
   var http = require('http');
   var fs = require('fs');
+  var path = require('path');
   var api = {};
   var file_hash = '';
   var file_name = '';
+  var file_dir = '.';
   api.getHash = function (filename) {
     var crypto = require('crypto');
     var fd;
@@ -12,7 +14,8 @@
     } catch (e) {
       return null;
     }
-    file_name = filename;
+    file_name = path.basename(filename);
+    file_dir = path.dirname(filename);
     var hashList = [];
     var buffer = new Buffer(4096);
     var size = fs.fstatSync(fd).size; // TODO: size check
@@ -95,7 +98,7 @@
             "Content-type": "application/x-www-form-urlencoded",
             "Accept": "*/*",
             "Referer": "http://shooter.cn/"
-          }          
+          }
         };
         http.request(opt, function (response) {
           var filename = response.headers['content-disposition'] || response.headers['Content-Disposition'];
@@ -104,6 +107,7 @@
           } else {
             filename = file_name+'.'+list[0].Files[0].Ext;
           }
+          filename = path.resolve(file_dir, filename);
           if (response.statusCode !== 200) {
             if (typeof callback === 'function') {
               callback(response.statusCode);
@@ -116,7 +120,7 @@
           });
           response.on('end', function() {
             file.end();
-            callback(null, 'OK');
+            callback(null, filename);
           });
         }).end();
       }
