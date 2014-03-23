@@ -12,7 +12,7 @@ args = args.slice(2);
 args.map(function (current, index, array) {
   Fn(current, function(err, res) {
     if (!err) {
-      console.log(current, '->', res);
+      console.log(path.basename(current), '->', res);
     } else {
       console.log(err);
     }

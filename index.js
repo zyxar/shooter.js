@@ -66,7 +66,12 @@
     req.end();
   };
   api.fetch = function (file, callback) {
-    api.getHash(file);
+    if (api.getHash(file) === null) {
+      if (typeof callback === 'function') {
+        callback('Error in open file: '+file);
+      }
+      return;
+    }
     api.submit(function (status, body) {
       if (status !== 200) {
         if (typeof callback === 'function') {
@@ -83,8 +88,8 @@
         }
         return;
       }
-      if (list.length > 0) {
-        var uri = list[0].Files[0].Link;
+      list.map(function(current, index, array) {
+        var uri = current.Files[0].Link;
         var opt = {
           host: 'www.shooter.cn',
           port: 80,
@@ -105,7 +110,7 @@
           if (typeof filename === 'string') {
             filename = filename.split('filename=')[1];
           } else {
-            filename = file_name+'.'+list[0].Files[0].Ext;
+            filename = file_name+'.'+current.Files[0].Ext;
           }
           filename = path.resolve(file_dir, filename);
           if (response.statusCode !== 200) {
@@ -114,7 +119,14 @@
             }
             return;
           }
-          var file = fs.createWriteStream(filename);
+          var suffix = '';
+          var suffix_id = 0;
+          while(fs.existsSync(filename+suffix)) {
+            suffix = '.'+suffix_id;
+            suffix_id++;
+          }
+          filename += suffix;
+          var file = fs.createWriteStream(filename, {flags: 'wx'});
           response.on('data', function (chunk) {
             file.write(chunk);
           });
@@ -123,7 +135,7 @@
             callback(null, filename);
           });
         }).end();
-      }
+      });
     });
   };
   exports = module.exports = api;
