@@ -51,6 +51,14 @@
         "Referer": "http://shooter.cn/"
       }
     };
+    var proxy = process.env.http_proxy || process.env.HTTP_PROXY;
+    if (typeof proxy === 'string') {
+      var url = require('url');
+      proxy = url.parse(proxy);
+      opt.host = proxy.hostname;
+      opt.port = proxy.port;
+      opt.path = 'http://shooter.cn/api/subapi.php';
+    }
     var req = http.request(opt, function (response) {
       var data = '';
       response.on('data', function (chunk) {
@@ -88,6 +96,11 @@
         }
         return;
       }
+      var url = require('url');
+      var proxy = process.env.http_proxy || process.env.HTTP_PROXY;
+      if (typeof proxy === 'string') {
+        proxy = url.parse(proxy);
+      }
       list.map(function(current, index, array) {
         var uri = current.Files[0].Link;
         var opt = {
@@ -105,7 +118,18 @@
             "Referer": "http://shooter.cn/"
           }
         };
+        if (typeof proxy === 'object' && proxy !== null) {
+          opt.host = proxy.hostname;
+          opt.port = proxy.port;
+          opt.path = 'http://www.shooter.cn'+url.parse(uri).path;
+        }
         http.request(opt, function (response) {
+          if (response.statusCode !== 200) {
+            if (typeof callback === 'function') {
+              callback(response.statusCode);
+            }
+            return;
+          }
           var filename = response.headers['content-disposition'] || response.headers['Content-Disposition'];
           if (typeof filename === 'string') {
             filename = filename.split('filename=')[1];
@@ -113,16 +137,12 @@
             filename = file_name+'.'+current.Files[0].Ext;
           }
           filename = path.resolve(file_dir, filename);
-          if (response.statusCode !== 200) {
-            if (typeof callback === 'function') {
-              callback(response.statusCode);
-            }
-            return;
-          }
-          var suffix = '';
-          var suffix_id = 0;
+          var ext = path.extname(filename);
+          filename = filename.substr(0, filename.length - ext.length);
+          var suffix = ext;
+          var suffix_id = 1;
           while(fs.existsSync(filename+suffix)) {
-            suffix = '.'+suffix_id;
+            suffix = '-'+suffix_id+ext;
             suffix_id++;
           }
           filename += suffix;
