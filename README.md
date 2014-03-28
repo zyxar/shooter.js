@@ -3,6 +3,22 @@ shooter.js
 
 fetch subtitle from shooter.cn
 
+## Install
+
+- via `npm`:
+
+  ```
+  npm install -g shooter
+  ```
+  
+- via `git`:
+
+  ```
+  git clone https://github.com/zyxar/shooter.js
+  cd shooter.js/
+  npm install -g
+  ```
+
 
 ## Example 
 
