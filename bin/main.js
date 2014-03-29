@@ -9,6 +9,13 @@ var args = process.argv;
 // argv[1] === 'XXX/bin/main.js'
 args = args.slice(2);
 
+if (args.length === 0) {
+  var package = require('../package');
+  console.log(package.name, package.version);
+  console.log(package.description+'\n');
+  process.exit(0);
+}
+
 args.map(function (current, index, array) {
   Fn(current, function(err, res) {
     if (!err) {
