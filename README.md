@@ -23,7 +23,7 @@ fetch subtitle from shooter.cn
 ## Example 
 
 ```js
-var Fn = require('..').fetch;
+var Fn = require('..').API.fetch;
 var path = require('path');
 
 var args = process.argv;
@@ -44,21 +44,30 @@ args.map(function (current, index, array) {
 
 ## Funcs
 
-- `getHash(file)`
+- `API.getHash(file)`
 
   - return `string` or `null`;
   - get four slice (4096) md5 hash values;
 
-- `submit(callback)`
+- `API.submit(callback)`
 
   - should be called after `getHash()`;
   - get subtitle information of the film file;
   - `callback(error, list)`, list is supposed to be an array with each element a metadata of a subtitle file;
 
-- `fetch(file, callback)`
+- `API.fetch(file, callback)`
 
   - all-in-one
 
+## Class
+
+- `FilmFile`:
+
+  ```js
+  function FilmFile (fullpath) {/*...*/};
+  FilmFile.prototype.parse = function(fullpath) {/*...*/};
+  FilmFile.prototype.fetch = function(callback) {/*...*/};
+  ```
 
 ## Note
 

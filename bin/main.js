@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // -*- js -*-
 
-var Fn = require('..').fetch;
+var Fn = require('..').API.fetch;
 var path = require('path');
 
 var args = process.argv;
@@ -12,9 +12,9 @@ args = args.slice(2);
 args.map(function (current, index, array) {
   Fn(current, function(err, res) {
     if (!err) {
-      console.log(path.basename(current), '->', res);
+      console.log('[DONE]', path.basename(current), '->', path.join(path.basename(path.dirname(res)), path.basename(res)));
     } else {
-      console.log(err);
+      console.log('[ERROR]', err);
     }
   });
 });

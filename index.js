@@ -2,11 +2,8 @@
   var http = require('http');
   var fs = require('fs');
   var path = require('path');
-  var api = {};
-  var file_hash = '';
-  var file_name = '';
-  var file_dir = '.';
-  api.getHash = function (filename) {
+
+  var getHash = function (filename) {
     var crypto = require('crypto');
     var fd;
     try {
@@ -14,25 +11,24 @@
     } catch (e) {
       return null;
     }
-    file_name = path.basename(filename);
-    file_dir = path.dirname(filename);
     var hashList = [];
     var buffer = new Buffer(4096);
-    var size = fs.fstatSync(fd).size; // TODO: size check
+    var size = fs.fstatSync(fd).size;
+    if (size < 4096 * 4) return null;
     [4096, size/3*2, size/3, size-8192].map(function (cur, idx, array) {
       var md5 = crypto.createHash('md5');
       var bytes = fs.readSync(fd, buffer, 0, 4096, cur);
       md5.update(buffer);
       hashList[idx] = md5.digest('hex');
     });
-    file_hash = hashList.join(';');
-    return file_hash;
+    return hashList.join(';');
   };
-  api.submit = function (callback) {
+
+  var submit = function (ff, callback) {
     var qs = require('querystring');
     var payload = qs.stringify({
-      filehash: file_hash,
-      pathinfo: file_name,
+      filehash: ff.hash,
+      pathinfo: ff.filename,
       format: 'json'
     });
     var opt = {
@@ -73,14 +69,32 @@
     req.write(payload);
     req.end();
   };
-  api.fetch = function (file, callback) {
-    if (api.getHash(file) === null) {
+
+  function FilmFile (fullpath) {
+    this.filename = null;
+    this.directory = null;
+    this.hash = null;
+    if (typeof fullpath === 'string') {
+      this.parse(fullpath);
+    }
+  }
+
+  FilmFile.prototype.parse = function(fullpath) {
+    this.filename = path.basename(fullpath);
+    this.directory = path.dirname(fullpath);
+    this.hash = getHash(fullpath);
+    return this;
+  };
+
+  FilmFile.prototype.fetch = function(callback) {
+    if (!this.hash) {
       if (typeof callback === 'function') {
-        callback('Error in open file: '+file);
+        callback('cannot read hash of '+this.filename);
       }
       return;
     }
-    api.submit(function (status, body) {
+    var self = this;
+    submit(self, function (status, body) {
       if (status !== 200) {
         if (typeof callback === 'function') {
           callback(status);
@@ -134,9 +148,9 @@
           if (typeof filename === 'string') {
             filename = filename.split('filename=')[1];
           } else {
-            filename = file_name+'.'+current.Files[0].Ext;
+            filename = self.filename+'.'+current.Files[0].Ext;
           }
-          filename = path.resolve(file_dir, filename);
+          filename = path.resolve(self.directory, filename);
           var ext = path.extname(filename);
           filename = filename.substr(0, filename.length - ext.length);
           var suffix = ext;
@@ -158,5 +172,27 @@
       });
     });
   };
-  exports = module.exports = api;
+
+  var api = {};
+  api.getHash = function (fullpath) {
+    api.current_filmfile = new FilmFile(fullpath);
+    return api.current_filmfile.hash;
+  };
+
+  api.submit = function (callback) {
+    if (api.current_filmfile instanceof FilmFile) {
+      return submit(api.current_filmfile, callback);
+    }
+    return callback('current processing file not found');
+  };
+
+  api.fetch = function (fullpath, callback) {
+    var ff = new FilmFile(fullpath);
+    return ff.fetch(callback);
+  };
+
+  exports = module.exports = {
+    FilmFile: FilmFile,
+    API: api
+  };
 }());
