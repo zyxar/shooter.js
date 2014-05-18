@@ -161,6 +161,12 @@
           }
           filename += suffix;
           var file = fs.createWriteStream(filename, {flags: 'wx'});
+          file.on('error', function(err) {
+            self.directory = path.resolve(process.env['HOME'], 'Desktop');
+            filename = path.resolve(self.directory, path.basename(filename));
+            console.log('Write to fallback dir:', self.directory);
+            file = fs.createWriteStream(filename, {flags: 'wx'});
+          });
           response.on('data', function (chunk) {
             file.write(chunk);
           });
