@@ -101,6 +101,12 @@
         }
         return;
       }
+      if (body === '�') {
+        if (typeof callback === 'function') {
+          callback('subtitles not found');
+        }
+        return;
+      }
       var list = [];
       try {
         list = JSON.parse(body);
@@ -116,6 +122,12 @@
         proxy = url.parse(proxy);
       }
       list.map(function(current, index, array) {
+        if (!(current.Files instanceof Array)) {
+          if (typeof callback === 'function') {
+            callback('invalid iterm:' + JSON.stringify(current));
+          }
+          return;
+        }
         var uri = current.Files[0].Link;
         var opt = {
           host: 'www.shooter.cn',
