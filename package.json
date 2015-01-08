@@ -1,6 +1,6 @@
 {
   "name": "shooter",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "fetch subtitle from shooter.cn",
   "main": "index.js",
   "author": "zyxar <teamo@live.com>",
