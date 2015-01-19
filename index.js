@@ -122,7 +122,7 @@
         proxy = url.parse(proxy);
       }
       list.map(function(current, index, array) {
-        if (!(current.Files instanceof Array)) {
+        if (!(current.Files instanceof Array) || current.Files.length === 0) {
           if (typeof callback === 'function') {
             callback('invalid iterm:' + JSON.stringify(current));
           }
