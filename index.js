@@ -159,6 +159,7 @@
           var filename = response.headers['content-disposition'] || response.headers['Content-Disposition'];
           if (typeof filename === 'string') {
             filename = filename.split('filename=')[1];
+            filename = new Buffer(filename, 'ascii').toString('utf8');
           } else {
             filename = self.filename+'.'+current.Files[0].Ext;
           }
