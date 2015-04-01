@@ -3,6 +3,8 @@ shooter.js
 
 fetch subtitle from shooter.cn
 
+[![NPM](https://nodei.co/npm/shooter.png?downloads=true)](https://nodei.co/npm/shooter/)
+
 ## Install
 
 - via `npm`:
